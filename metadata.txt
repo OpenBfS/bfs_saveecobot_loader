@@ -12,8 +12,8 @@ email=mlechner@bfs.de
 
 about=Saveecobot Loader loads data from https://www.saveecobot.com/en/radiation-maps e.g. https://www.saveecobot.com/storage/maps_data
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/mlechner/bfs_saveecobot_loader/issues
+repository=https://github.com/mlechner/bfs_saveecobot_loader
 # End of mandatory metadata
 
 # Recommended items:
