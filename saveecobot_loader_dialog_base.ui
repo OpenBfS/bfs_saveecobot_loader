@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>742</width>
+    <width>745</width>
     <height>529</height>
    </rect>
   </property>
@@ -29,22 +29,6 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QDateTimeEdit" name="dateTimeEdit">
-   <property name="geometry">
-    <rect>
-     <x>520</x>
-     <y>400</y>
-     <width>194</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="calendarPopup">
-    <bool>true</bool>
-   </property>
-   <property name="timeSpec">
-    <enum>Qt::UTC</enum>
-   </property>
-  </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
@@ -60,37 +44,168 @@
     </font>
    </property>
    <property name="text">
-    <string>Saveecobot data loader (radiological/gama data only)</string>
+    <string>Saveecobot data loader (radiological/gamma data only)</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="sebDataUrlLineEdit">
+  <widget class="QTextBrowser" name="textBrowser">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>140</y>
-     <width>511</width>
-     <height>25</height>
+     <x>340</x>
+     <y>100</y>
+     <width>371</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="html">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;MIt diesem Plugin werden die Radioaktivitätsdaten von Saveecobot (&lt;a href=&quot;https://www.saveecobot.com/en/radiation-maps&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://www.saveecobot.com/en/radiation-maps&lt;/span&gt;&lt;/a&gt;) heruntergeladen. Der Download benötigt mehrere MInuten, da die Detaildaten, die auch die Stationsinformationen enthalten, einzeln heruntergeladen werden müssen. Dazu sind etwa 700 (!) Anfragen erforderlich.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Die verwendeten URLs sind bereits passend voreingestellt, können im Falle einer Änderung der Webseite aber angepasst werden.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>100</y>
+     <width>271</width>
+     <height>81</height>
     </rect>
    </property>
    <property name="text">
-    <string>saveecobot data url</string>
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="resources.qrc">:/plugins/saveecobot_loader/saveecobot_logo.svg</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="sebMarkerDataUrlLineEdit">
+  <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>220</y>
-     <width>501</width>
-     <height>25</height>
+     <x>50</x>
+     <y>200</y>
+     <width>241</width>
+     <height>81</height>
     </rect>
    </property>
    <property name="text">
-    <string>save eco bot marker data url</string>
+    <string/>
    </property>
+   <property name="textFormat">
+    <enum>Qt::RichText</enum>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="resources.qrc">:/plugins/saveecobot_loader/bfs_logo.png</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>330</y>
+     <width>661</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Saveecobot data URL</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="sebDataUrlLineEdit">
+      <property name="text">
+       <string>saveecobot data url</string>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>31</x>
+     <y>370</y>
+     <width>681</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Saveecobot marker URL</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="sebMarkerDataUrlLineEdit">
+      <property name="text">
+       <string>save eco bot marker data url</string>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>420</y>
+     <width>671</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>UTC Timestamp to be used to request data (defaults to now)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDateTimeEdit" name="dateTimeEdit">
+      <property name="calendarPopup">
+       <bool>true</bool>
+      </property>
+      <property name="timeSpec">
+       <enum>Qt::UTC</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
- <resources/>
+ <tabstops>
+  <tabstop>textBrowser</tabstop>
+  <tabstop>sebDataUrlLineEdit</tabstop>
+  <tabstop>sebMarkerDataUrlLineEdit</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>button_box</sender>

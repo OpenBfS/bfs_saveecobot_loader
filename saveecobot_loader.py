@@ -22,7 +22,6 @@
  ***************************************************************************/
 """
 
-from numpy import fromstring
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction

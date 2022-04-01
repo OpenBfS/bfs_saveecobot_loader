@@ -1,5 +1,7 @@
 <RCC>
-    <qresource prefix="/plugins/saveecobot_loader" >
-        <file>icon.png</file>
-    </qresource>
+  <qresource prefix="/plugins/saveecobot_loader">
+    <file>saveecobot_logo.svg</file>
+    <file>bfs_logo.png</file>
+    <file>icon.png</file>
+  </qresource>
 </RCC>
