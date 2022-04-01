@@ -22,9 +22,9 @@
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime, Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QProgressDialog
 from qgis.core import Qgis, QgsVectorLayer, QgsProject, QgsFeature, QgsPointXY, QgsGeometry, QgsField, QgsCoordinateReferenceSystem
 from qgis.utils import iface
 
@@ -289,27 +289,31 @@ class SaveecobotLoader:
             vl.updateFields() # tell the vector layer to fetch changes from the provider
 
             # load detail data for features
-            vl.startEditing()
             count = vl.featureCount()
+            self.prog = QProgressDialog('Requesting detail data. This may take a while. Please be patient ...', 'Cancel', 0, 100)
+            self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
+            self.prog.setWindowModality(Qt.WindowModal)
+            vl.startEditing()
             for current, feature in enumerate(vl.getFeatures()):
-                resp = requests.get(markerurl + "&marker_id=" + str(feature.attribute("id")))
+                sfid = str(feature.attribute("id"))
+                resp = requests.get(markerurl + "&marker_id=" + sfid)
                 if resp.status_code == 200:
                     markerdata = resp.json()
                 else:
-                    self.iface.messageBar().pushMessage("Error", "Could not load details for " + str(feature.attribute("id")), level=Qgis.Critical)
+                    self.iface.messageBar().pushMessage("Error", "Could not load details for " + sfid, level=Qgis.Critical)
                     break
                 feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
                 if (len(markerdata["history"]) > 0):
-                    #feature.setAttribute("latest", QDateTime.fromString("2022-04-01 09:00:00", "yyyy-MM-dd hh:mm:ss"))
                     feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
                     feature.setAttribute("history", str(markerdata["history"]))
                 feature.setAttribute("history_hours", int(markerdata["history_hours"]))
                 feature.setAttribute("content", str(markerdata["content"]))
                 vl.updateFeature(feature)
                 percent = current / float(count) * 100
-                self.iface.messageBar().pushMessage("Fetched {} % of detailed data.".format(int(percent)))
+                self.prog.setValue(percent)
+                self.prog.setLabelText('Requesting details for device ID ' + sfid + '. Please be patient.')
+                if self.prog.wasCanceled():
+                    break
             vl.commitChanges()
-            vl.updateFields() # tell the vector layer to fetch changes from the provider
-                
-            #QgsProject.instance().addMapLayer(vl)
+            self.prog.close()
             self.iface.mapCanvas().refresh()
