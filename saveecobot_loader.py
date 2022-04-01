@@ -22,7 +22,8 @@
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
+from numpy import fromstring
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import Qgis, QgsVectorLayer, QgsProject, QgsFeature, QgsPointXY, QgsGeometry, QgsField, QgsCoordinateReferenceSystem
@@ -34,6 +35,7 @@ from .resources import *
 from .saveecobot_loader_dialog import SaveecobotLoaderDialog
 import os.path
 import requests
+from datetime import datetime
 
 
 class SaveecobotLoader:
@@ -193,53 +195,122 @@ class SaveecobotLoader:
             self.first_start = False
             self.dlg = SaveecobotLoaderDialog()
 
+        # set default values for dlg
+        self.dlg.sebDataUrlLineEdit.setText("https://www.saveecobot.com/storage/maps_data.js")
+        self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/en/maps/marker.json")
+        self.dlg.dateTimeEdit.setDateTime(datetime.utcnow())
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            seburl = "https://www.saveecobot.com/storage/maps_data.js?date=2022-03-30T1125:25"
+            requesttime = self.dlg.dateTimeEdit.dateTime()
+            sebtimestring = requesttime.toString('yyyy-MM-ddThhmm:ss')
+            markertimestring = requesttime.toString('yyyy-MM-ddThh-mm:ss')
+            #seburl = "https://www.saveecobot.com/storage/maps_data.js?date=2022-03-30T1125:25"
+            seburl = self.dlg.sebDataUrlLineEdit.text() + "?date=" + sebtimestring
+            #markerurl = "https://www.saveecobot.com/en/maps/marker.json?...&rand=2022-04-01T11-18%3A24"
+            markerurl = self.dlg.sebMarkerDataUrlLineEdit.text() + "?marker_type=device&pollutant=gamma&is_wide=1&is_iframe=0&is_widget=0&rand=" + markertimestring
+
             sebkey = 'gamma'
-            sebdata = requests.get(seburl).json()
-            sebfilterdata = []
+            resp = requests.get(seburl)
+            if resp.status_code == 200:
+                sebdata = resp.json()
+            else:
+                self.iface.messageBar().pushMessage("Error", "Couldn't load data from " + seburl, level=Qgis.Critical)
+                return False
             # create layer
             vl = QgsVectorLayer("Point", "temporary_points", "memory")
             vl.setCrs(QgsCoordinateReferenceSystem('EPSG:4326'))
 
             pr = vl.dataProvider()
-            # add fields
-            pr.addAttributes([QgsField("id", QVariant.Double),
-                    QgsField(sebkey, QVariant.Double),
+            # add fields default fields
+            pr.addAttributes([QgsField("id", QVariant.Int),
                     QgsField("lon",  QVariant.Double),
                     QgsField("lat", QVariant.Double)])
+            # add all other fields i a generic way
+            keylist = []
+            for sebdatarow in sebdata:
+                for key in sebdatarow.keys():
+                    if (key not in keylist):
+                        keylist.append(key)
+                        try:
+                            float(sebdatarow[key])
+                            pr.addAttributes([QgsField(key, QVariant.Double)])
+                        except ValueError:
+                            pr.addAttributes([QgsField(key, QVariant.String)])                                
+                    
             vl.updateFields() # tell the vector layer to fetch changes from the provider
-
+            # add detailfields
 
             for sebdatarow in sebdata:
                 if sebkey in sebdatarow:
-                    sebfilterdata.append(sebdatarow)
                     # add a feature
                     feat = QgsFeature()
                     feat.setFields(vl.fields())
                     feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(sebdatarow["n"]),float(sebdatarow["a"]))))
                     featattributes = []
-                    for key in ("i", sebkey, "n", "a"):
-                        if type(float(sebdatarow[key])):
-                            featattributes.append(float(sebdatarow[key]))
-                    #featattributes = [int(sebdatarow["i"]),float(sebdatarow[sebkey]),float(sebdatarow["a"]),float(sebdatarow["n"])]
-                    if len(featattributes) == 4:
+                    for key in feat.fields().names():
+                        if key == "id":
+                            featattributes.append(int(sebdatarow["i"]))
+                        if key == "lon":
+                            featattributes.append(float(sebdatarow["a"]))
+                        if key == "lat":
+                            featattributes.append(float(sebdatarow["n"]))
+                    for key in feat.fields().names():
+                        if key not in ("id", "device_id", "lon", "lat"):
+                            if key in sebdatarow:
+                                if vl.fields().field(key).type() == QVariant.Int:
+                                    featattributes.append(int(sebdatarow[key]))
+                                elif vl.fields().field(key).type() == QVariant.Double:
+                                    featattributes.append(float(sebdatarow[key]))
+                                else:
+                                    featattributes.append(str(sebdatarow[key]))
+                            else:
+                                featattributes.append(None)
+                    if len(featattributes) == len(vl.fields()):
                         feat.setAttributes(featattributes)
                         pr.addFeatures([feat])
                     else:
-                        iface.messageBar().pushMessage("Error", "featattributes len is " + str(len(featattributes)), level=Qgis.Critical)
+                        self.iface.messageBar().pushMessage("Error", "featattributes len is " + str(len(featattributes)), level=Qgis.Critical)
+
 
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
             vl.updateExtents()
             QgsProject.instance().addMapLayer(vl)
-            iface.mapCanvas().refresh()
-            #seburl = self.dlg.seburl...
+            self.iface.mapCanvas().refresh()
 
+            pr.addAttributes([QgsField("device_id", QVariant.String),
+                    QgsField("latest", QVariant.DateTime),
+                    QgsField("history", QVariant.String),
+                    QgsField("history_hours", QVariant.Int),
+                    QgsField("content", QVariant.String)])
+            vl.updateFields() # tell the vector layer to fetch changes from the provider
+
+            # load detail data for features
+            vl.startEditing()
+            count = vl.featureCount()
+            for current, feature in enumerate(vl.getFeatures()):
+                resp = requests.get(markerurl + "&marker_id=" + str(feature.attribute("id")))
+                if resp.status_code == 200:
+                    markerdata = resp.json()
+                else:
+                    self.iface.messageBar().pushMessage("Error", "Could not load details for " + str(feature.attribute("id")), level=Qgis.Critical)
+                    break
+                feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
+                if (len(markerdata["history"]) > 0):
+                    #feature.setAttribute("latest", QDateTime.fromString("2022-04-01 09:00:00", "yyyy-MM-dd hh:mm:ss"))
+                    feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
+                    feature.setAttribute("history", str(markerdata["history"]))
+                feature.setAttribute("history_hours", int(markerdata["history_hours"]))
+                feature.setAttribute("content", str(markerdata["content"]))
+                vl.updateFeature(feature)
+                percent = current / float(count) * 100
+                self.iface.messageBar().pushMessage("Fetched {} % of detailed data.".format(int(percent)))
+            vl.commitChanges()
+            vl.updateFields() # tell the vector layer to fetch changes from the provider
+                
+            #QgsProject.instance().addMapLayer(vl)
+            self.iface.mapCanvas().refresh()
