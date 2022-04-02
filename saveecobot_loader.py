@@ -22,10 +22,11 @@
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime, Qt
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime, Qt, QUrlQuery, QUrl
+from qgis.PyQt.QtNetwork import QNetworkRequest
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QProgressDialog
-from qgis.core import Qgis, QgsVectorLayer, QgsProject, QgsFeature, QgsPointXY, QgsGeometry, QgsField, QgsCoordinateReferenceSystem
+from qgis.core import Qgis, QgsVectorLayer, QgsProject, QgsFeature, QgsPointXY, QgsGeometry, QgsField, QgsCoordinateReferenceSystem, QgsNetworkAccessManager, QgsNetworkReplyContent
 from qgis.utils import iface
 
 # Initialize Qt resources from file resources.py
@@ -33,7 +34,7 @@ from .resources import *
 # Import the code for the dialog
 from .saveecobot_loader_dialog import SaveecobotLoaderDialog
 import os.path
-import requests
+import json
 from datetime import datetime
 
 
@@ -207,18 +208,35 @@ class SaveecobotLoader:
             requesttime = self.dlg.dateTimeEdit.dateTime()
             sebtimestring = requesttime.toString('yyyy-MM-ddThhmm:ss')
             markertimestring = requesttime.toString('yyyy-MM-ddThh-mm:ss')
-            #seburl = "https://www.saveecobot.com/storage/maps_data.js?date=2022-03-30T1125:25"
-            seburl = self.dlg.sebDataUrlLineEdit.text() + "?date=" + sebtimestring
-            #markerurl = "https://www.saveecobot.com/en/maps/marker.json?...&rand=2022-04-01T11-18%3A24"
-            markerurl = self.dlg.sebMarkerDataUrlLineEdit.text() + "?marker_type=device&pollutant=gamma&is_wide=1&is_iframe=0&is_widget=0&rand=" + markertimestring
-
             sebkey = 'gamma'
-            resp = requests.get(seburl)
-            if resp.status_code == 200:
-                sebdata = resp.json()
+            
+            # Set up the first GET Request to SaveEcoBot
+            sebquery = QUrlQuery()
+            sebquery.addQueryItem('date', sebtimestring)
+            seburl = QUrl(self.dlg.sebDataUrlLineEdit.text())
+            seburl.setQuery(sebquery)
+
+            manager = QgsNetworkAccessManager()
+
+            #seburl = "https://www.saveecobot.com/storage/maps_data.js?date=2022-03-30T1125:25"
+            #seburl = self.dlg.sebDataUrlLineEdit.text() + "?date=" + sebtimestring
+            #markerurl = "https://www.saveecobot.com/en/maps/marker.json?...&rand=2022-04-01T11-18%3A24"
+            #markerurl = self.dlg.sebMarkerDataUrlLineEdit.text() + "?marker_type=device&pollutant=gamma&is_wide=1&is_iframe=0&is_widget=0&rand=" + markertimestring
+
+            sebrequest = QNetworkRequest(seburl)
+            response: QgsNetworkReplyContent = manager.blockingGet(sebrequest)
+            status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+            if status_code == 200:
+                # Get the content of the response and process it
+                sebdata = json.loads(bytes(response.content()))
             else:
-                self.iface.messageBar().pushMessage("Error", "Couldn't load data from " + seburl, level=Qgis.Critical)
-                return False
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl, level=Qgis.Critical)
+            # resp = requests.get(seburl)
+            # if resp.status_code == 200:
+            #     sebdata = resp.json()
+            # else:
+            #     self.iface.messageBar().pushMessage("Error", "Couldn't load data from " + seburl, level=Qgis.Critical)
+            #     return False
             # create layer
             vl = QgsVectorLayer("Point", "temporary_points", "memory")
             vl.setCrs(QgsCoordinateReferenceSystem('EPSG:4326'))
@@ -294,14 +312,34 @@ class SaveecobotLoader:
             self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
             self.prog.setWindowModality(Qt.WindowModal)
             vl.startEditing()
+            markerquery = QUrlQuery()
+            markerquery.addQueryItem('marker_type', 'device')
+            markerquery.addQueryItem('pollutant', str(sebkey))
+            markerquery.addQueryItem('is_wide', str(1))
+            markerquery.addQueryItem('is_iframe', str(0))
+            markerquery.addQueryItem('is_widget', str(0))
+            markerquery.addQueryItem('rand', markertimestring)
+            markerurl = QUrl(self.dlg.sebMarkerDataUrlLineEdit.text())
+            #markerurl.setQuery(markerquery)
+
             for current, feature in enumerate(vl.getFeatures()):
                 sfid = str(feature.attribute("id"))
-                resp = requests.get(markerurl + "&marker_id=" + sfid)
-                if resp.status_code == 200:
-                    markerdata = resp.json()
+                markerquery.addQueryItem('marker_id', sfid)
+                markerurl.setQuery(markerquery)
+                markerrequest = QNetworkRequest(markerurl)
+                response: QgsNetworkReplyContent = manager.blockingGet(markerrequest)
+                status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+                if status_code == 200:
+                    # Get the content of the response and process it
+                    markerdata = json.loads(bytes(response.content()))
                 else:
-                    self.iface.messageBar().pushMessage("Error", "Could not load details for " + sfid, level=Qgis.Critical)
-                    break
+                    self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
+                # resp = requests.get(markerurl)
+                # if resp.status_code == 200:
+                #     markerdata = resp.json()
+                # else:
+                #     self.iface.messageBar().pushMessage("Error", "Could not load details for " + sfid, level=Qgis.Critical)
+                #     break
                 feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
                 if (len(markerdata["history"]) > 0):
                     feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
