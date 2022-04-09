@@ -311,6 +311,7 @@ class SaveecobotLoader:
             self.prog = QProgressDialog('Requesting detail data. This may take a while. Please be patient ...', 'Cancel', 0, 100)
             self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
             self.prog.setWindowModality(Qt.WindowModal)
+            self.prog.setMinimumWidth(500)
             vl.startEditing()
             markerquery = QUrlQuery()
             markerquery.addQueryItem('marker_type', 'device')
@@ -334,6 +335,7 @@ class SaveecobotLoader:
                     markerdata = json.loads(bytes(response.content()))
                 else:
                     self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
+                markerquery.removeQueryItem('marker_id')
                 # resp = requests.get(markerurl)
                 # if resp.status_code == 200:
                 #     markerdata = resp.json()
@@ -348,7 +350,7 @@ class SaveecobotLoader:
                 feature.setAttribute("content", str(markerdata["content"]))
                 vl.updateFeature(feature)
                 percent = current / float(count) * 100
-                self.prog.setValue(percent)
+                self.prog.setValue(int(percent))
                 self.prog.setLabelText('Requesting details for device ID ' + sfid + '. Please be patient.')
                 if self.prog.wasCanceled():
                     break
