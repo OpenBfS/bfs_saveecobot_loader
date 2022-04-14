@@ -194,11 +194,12 @@ class SaveecobotLoader:
         if self.first_start == True:
             self.first_start = False
             self.dlg = SaveecobotLoaderDialog()
+            self.dlg.sebDataUrlLineEdit.setText("https://www.saveecobot.com/storage/maps_data.js")
+            self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/en/maps/marker.json")
 
         # set default values for dlg
-        self.dlg.sebDataUrlLineEdit.setText("https://www.saveecobot.com/storage/maps_data.js")
-        self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/en/maps/marker.json")
         self.dlg.dateTimeEdit.setDateTime(datetime.utcnow())
+        self.dlg.lineEditLayerName.setText(datetime.strftime(datetime.utcnow(), '%Y%m%d-%H%M_saveecobot'))
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
@@ -215,6 +216,12 @@ class SaveecobotLoader:
             sebquery.addQueryItem('date', sebtimestring)
             seburl = QUrl(self.dlg.sebDataUrlLineEdit.text())
             seburl.setQuery(sebquery)
+            self.prog = QProgressDialog('Requesting data. This may take a while. Please be patient ...', 'Cancel', 0, 100)
+            self.prog.setWindowTitle('SaveEcoBot data loader. Requesting locations.')
+            self.prog.setWindowModality(Qt.WindowModal)
+            self.prog.setMinimumWidth(500)
+            self.prog.setValue(1)
+            self.prog.show()
 
             manager = QgsNetworkAccessManager()
 
@@ -231,14 +238,10 @@ class SaveecobotLoader:
                 sebdata = json.loads(bytes(response.content()))
             else:
                 self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl, level=Qgis.Critical)
-            # resp = requests.get(seburl)
-            # if resp.status_code == 200:
-            #     sebdata = resp.json()
-            # else:
-            #     self.iface.messageBar().pushMessage("Error", "Couldn't load data from " + seburl, level=Qgis.Critical)
-            #     return False
+
             # create layer
-            vl = QgsVectorLayer("Point", "temporary_points", "memory")
+            vl_name = self.dlg.lineEditLayerName.text() if (self.dlg.lineEditLayerName.text() and len(self.dlg.lineEditLayerName.text()) > 0) else "temporary_saveecobot"
+            vl = QgsVectorLayer("Point", vl_name, "memory")
             vl.setCrs(QgsCoordinateReferenceSystem('EPSG:4326'))
 
             pr = vl.dataProvider()
@@ -305,13 +308,6 @@ class SaveecobotLoader:
                     QgsField("history_hours", QVariant.Int),
                     QgsField("content", QVariant.String)])
             vl.updateFields() # tell the vector layer to fetch changes from the provider
-
-            # load detail data for features
-            count = vl.featureCount()
-            self.prog = QProgressDialog('Requesting detail data. This may take a while. Please be patient ...', 'Cancel', 0, 100)
-            self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
-            self.prog.setWindowModality(Qt.WindowModal)
-            self.prog.setMinimumWidth(500)
             vl.startEditing()
             markerquery = QUrlQuery()
             markerquery.addQueryItem('marker_type', 'device')
@@ -321,10 +317,16 @@ class SaveecobotLoader:
             markerquery.addQueryItem('is_widget', str(0))
             markerquery.addQueryItem('rand', markertimestring)
             markerurl = QUrl(self.dlg.sebMarkerDataUrlLineEdit.text())
-            #markerurl.setQuery(markerquery)
+
+            # load detail data for features
+            count = vl.featureCount()
+            self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
 
             for current, feature in enumerate(vl.getFeatures()):
                 sfid = str(feature.attribute("id"))
+                percent = current / float(count) * 100
+                self.prog.setValue(int(percent))
+                self.prog.setLabelText('Requesting details for device ID ' + sfid + '. Please be patient.')
                 markerquery.addQueryItem('marker_id', sfid)
                 markerurl.setQuery(markerquery)
                 markerrequest = QNetworkRequest(markerurl)
