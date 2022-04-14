@@ -220,7 +220,6 @@ class SaveecobotLoader:
             self.prog.setWindowTitle('SaveEcoBot data loader. Requesting locations.')
             self.prog.setWindowModality(Qt.WindowModal)
             self.prog.setMinimumWidth(500)
-            self.prog.setValue(1)
             self.prog.show()
 
             manager = QgsNetworkAccessManager()
