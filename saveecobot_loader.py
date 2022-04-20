@@ -250,50 +250,54 @@ class SaveecobotLoader:
                     QgsField("lat", QVariant.Double)])
             # add all other fields i a generic way
             keylist = []
-            for sebdatarow in sebdata:
-                for key in sebdatarow.keys():
-                    if (key not in keylist):
-                        keylist.append(key)
-                        try:
-                            float(sebdatarow[key])
-                            pr.addAttributes([QgsField(key, QVariant.Double)])
-                        except ValueError:
-                            pr.addAttributes([QgsField(key, QVariant.String)])                                
+            if 'devices' in sebdata.keys() and isinstance(sebdata['devices'], list):
+                for sebdatarow in sebdata['devices']:
+                    for key in sebdatarow.keys():
+                        if (key not in keylist):
+                            keylist.append(key)
+                            try:
+                                float(sebdatarow[key])
+                                pr.addAttributes([QgsField(key, QVariant.Double)])
+                            except ValueError:
+                                pr.addAttributes([QgsField(key, QVariant.String)])
+            else:
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl, level=Qgis.Critical)
+                exit
                     
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             # add detailfields
 
-            for sebdatarow in sebdata:
-                if sebkey in sebdatarow:
-                    # add a feature
-                    feat = QgsFeature()
-                    feat.setFields(vl.fields())
-                    feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(sebdatarow["n"]),float(sebdatarow["a"]))))
-                    featattributes = []
-                    for key in feat.fields().names():
-                        if key == "id":
-                            featattributes.append(int(sebdatarow["i"]))
-                        if key == "lon":
-                            featattributes.append(float(sebdatarow["a"]))
-                        if key == "lat":
-                            featattributes.append(float(sebdatarow["n"]))
-                    for key in feat.fields().names():
-                        if key not in ("id", "device_id", "lon", "lat"):
-                            if key in sebdatarow:
-                                if vl.fields().field(key).type() == QVariant.Int:
-                                    featattributes.append(int(sebdatarow[key]))
-                                elif vl.fields().field(key).type() == QVariant.Double:
-                                    featattributes.append(float(sebdatarow[key]))
+            if 'devices' in sebdata.keys() and isinstance(sebdata['devices'], list):
+                for sebdatarow in sebdata['devices']:
+                    if sebkey in sebdatarow:
+                        # add a feature
+                        feat = QgsFeature()
+                        feat.setFields(vl.fields())
+                        feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(sebdatarow["n"]),float(sebdatarow["a"]))))
+                        featattributes = []
+                        for key in feat.fields().names():
+                            if key == "id":
+                                featattributes.append(int(sebdatarow["i"]))
+                            if key == "lon":
+                                featattributes.append(float(sebdatarow["a"]))
+                            if key == "lat":
+                                featattributes.append(float(sebdatarow["n"]))
+                        for key in feat.fields().names():
+                            if key not in ("id", "device_id", "lon", "lat"):
+                                if key in sebdatarow:
+                                    if vl.fields().field(key).type() == QVariant.Int:
+                                        featattributes.append(int(sebdatarow[key]))
+                                    elif vl.fields().field(key).type() == QVariant.Double:
+                                        featattributes.append(float(sebdatarow[key]))
+                                    else:
+                                        featattributes.append(str(sebdatarow[key]))
                                 else:
-                                    featattributes.append(str(sebdatarow[key]))
-                            else:
-                                featattributes.append(None)
-                    if len(featattributes) == len(vl.fields()):
-                        feat.setAttributes(featattributes)
-                        pr.addFeatures([feat])
-                    else:
-                        self.iface.messageBar().pushMessage("Error", "featattributes len is " + str(len(featattributes)), level=Qgis.Critical)
-
+                                    featattributes.append(None)
+                        if len(featattributes) == len(vl.fields()):
+                            feat.setAttributes(featattributes)
+                            pr.addFeatures([feat])
+                        else:
+                            self.iface.messageBar().pushMessage("Error", "featattributes len is " + str(len(featattributes)), level=Qgis.Critical)
 
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
