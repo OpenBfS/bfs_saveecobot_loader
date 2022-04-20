@@ -303,6 +303,16 @@ class SaveecobotLoader:
             # because change of extent in provider is not propagated to the layer
             vl.updateExtents()
             QgsProject.instance().addMapLayer(vl)
+            # add last_updated_at / gamma to layer abstract
+            if 'last_updated_at' in sebdata.keys() and 'gamma' in sebdata['last_updated_at']:
+                vlm = vl.metadata()
+                vlm.setAbstract('gamma latest updated (Ukraine local time): ' + sebdata['last_updated_at']['gamma'])
+                vl.setMetadata(vlm)
+            # activate show feature count
+            ltroot = QgsProject.instance().layerTreeRoot()
+            ltlayer = ltroot.findLayer(vl.id())
+            ltlayer.setCustomProperty("showFeatureCount", True)
+            # refresh
             self.iface.mapCanvas().refresh()
 
             pr.addAttributes([QgsField("device_id", QVariant.String),
@@ -360,5 +370,6 @@ class SaveecobotLoader:
                 if self.prog.wasCanceled():
                     break
             vl.commitChanges()
+
             self.prog.close()
             self.iface.mapCanvas().refresh()
