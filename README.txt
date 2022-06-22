@@ -1,1 +1,0 @@
-Mit diesem QGIS Plugin werden die Radioaktivitätsdaten von SaveEcoBot (https://www.saveecobot.com/en/radiation-maps) heruntergeladen. Der Download benötigt mehrere MInuten, da die Detaildaten, die auch die Stationsinformationen enthalten, einzeln heruntergeladen werden müssen. Dazu sind etwa 700 (!) Anfragen erforderlich.
