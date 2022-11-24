@@ -224,11 +224,6 @@ class SaveecobotLoader:
 
             manager = QgsNetworkAccessManager()
 
-            #seburl = "https://www.saveecobot.com/storage/maps_data.js?date=2022-03-30T1125:25"
-            #seburl = self.dlg.sebDataUrlLineEdit.text() + "?date=" + sebtimestring
-            #markerurl = "https://www.saveecobot.com/en/maps/marker.json?...&rand=2022-04-01T11-18%3A24"
-            #markerurl = self.dlg.sebMarkerDataUrlLineEdit.text() + "?marker_type=device&pollutant=gamma&is_wide=1&is_iframe=0&is_widget=0&rand=" + markertimestring
-
             sebrequest = QNetworkRequest(seburl)
             response: QgsNetworkReplyContent = manager.blockingGet(sebrequest)
             status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
@@ -308,10 +303,6 @@ class SaveecobotLoader:
                 vlm = vl.metadata()
                 vlm.setAbstract('gamma latest updated (Ukraine local time): ' + sebdata['last_updated_at']['gamma'])
                 vl.setMetadata(vlm)
-            # activate show feature count
-            ltroot = QgsProject.instance().layerTreeRoot()
-            ltlayer = ltroot.findLayer(vl.id())
-            ltlayer.setCustomProperty("showFeatureCount", True)
             # refresh
             self.iface.mapCanvas().refresh()
 
@@ -351,12 +342,6 @@ class SaveecobotLoader:
                 else:
                     self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
                 markerquery.removeQueryItem('marker_id')
-                # resp = requests.get(markerurl)
-                # if resp.status_code == 200:
-                #     markerdata = resp.json()
-                # else:
-                #     self.iface.messageBar().pushMessage("Error", "Could not load details for " + sfid, level=Qgis.Critical)
-                #     break
                 feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
                 if (len(markerdata["history"]) > 0):
                     feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
@@ -370,6 +355,10 @@ class SaveecobotLoader:
                 if self.prog.wasCanceled():
                     break
             vl.commitChanges()
+            # activate show feature count
+            ltroot = QgsProject.instance().layerTreeRoot()
+            ltlayer = ltroot.findLayer(vl.id())
+            ltlayer.setCustomProperty("showFeatureCount", True)
 
             self.prog.close()
             self.iface.mapCanvas().refresh()
