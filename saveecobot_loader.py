@@ -281,18 +281,32 @@ class SaveecobotLoader:
                             if key not in ("id", "device_id", "lon", "lat"):
                                 if key in sebdatarow:
                                     if vl.fields().field(key).type() == QVariant.Int:
-                                        featattributes.append(int(sebdatarow[key]))
+                                        try:
+                                            featattributes.append(int(sebdatarow[key]))
+                                        except:
+                                            featattributes.append(None)
+                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.Warning)
                                     elif vl.fields().field(key).type() == QVariant.Double:
-                                        featattributes.append(float(sebdatarow[key]))
+                                        try:
+                                            featattributes.append(float(sebdatarow[key]))
+                                        except:
+                                            featattributes.append(None)
+                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.Warning)
+                                    elif vl.fields().field(key).type() == QVariant.String:
+                                        try:
+                                            featattributes.append(str(sebdatarow[key]))
+                                        except:
+                                            featattributes.append(None)
+                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.Warning)
                                     else:
-                                        featattributes.append(str(sebdatarow[key]))
+                                        featattributes.append(None)
                                 else:
                                     featattributes.append(None)
                         if len(featattributes) == len(vl.fields()):
                             feat.setAttributes(featattributes)
                             pr.addFeatures([feat])
                         else:
-                            self.iface.messageBar().pushMessage("Error", "featattributes len is " + str(len(featattributes)), level=Qgis.Critical)
+                            self.iface.messageBar().pushMessage("Error", "featattributes len for id " + str(featattributes[0]) + " is " + str(len(featattributes)), level=Qgis.Critical)
 
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
