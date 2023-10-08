@@ -341,6 +341,7 @@ class SaveecobotLoader:
             self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
 
             for current, feature in enumerate(vl.getFeatures()):
+                markerdata = json.loads('{}')
                 sfid = str(feature.attribute("id"))
                 percent = current / float(count) * 100
                 self.prog.setValue(int(percent))
@@ -356,13 +357,14 @@ class SaveecobotLoader:
                 else:
                     self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
                 markerquery.removeQueryItem('marker_id')
-                feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
-                if (len(markerdata["history"]) > 0):
-                    feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
-                    feature.setAttribute("history", str(markerdata["history"]))
-                feature.setAttribute("history_hours", int(markerdata["history_hours"]))
-                feature.setAttribute("content", str(markerdata["content"]))
-                vl.updateFeature(feature)
+                if markerdata != json.loads('{}'):
+                    feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
+                    if (len(markerdata["history"]) > 0):
+                        feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
+                        feature.setAttribute("history", str(markerdata["history"]))
+                    feature.setAttribute("history_hours", int(markerdata["history_hours"]))
+                    feature.setAttribute("content", str(markerdata["content"]))
+                    vl.updateFeature(feature)
                 percent = current / float(count) * 100
                 self.prog.setValue(int(percent))
                 self.prog.setLabelText('Requesting details for device ID ' + sfid + '. Please be patient.')
