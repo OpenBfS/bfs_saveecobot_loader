@@ -1,0 +1,37 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+name: SaveEcoBot Loader Plugin
+applicationSuite: QGIS
+url: 'https://github.com/OpenBfS/bfs_saveecobot_loader.git'
+landingURL: 'https://plugins.qgis.org/plugins/saveecobot_loader/'
+releaseDate: '2023-10-08'
+softwareVersion: '0.14'
+developmentStatus: beta
+softwareType: standalone/mobile
+platforms:
+  - linux
+  - windows
+categories:
+  - data-collection
+  - data-visualization
+legal:
+  license: LGPL-3.0-or-later
+intendedAudience:
+  countries:
+    - ua
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+description:
+  en:
+    genericName: QGIS Plugin
+    shortDescription: >-
+      This experimental Plugin loads radiological SaveEcoBot data from their
+      Homepage (https://www.saveecobot.com/en/radiation-maps) into QGIS
+    longDescription: |2
+       This experimental Plugin loads radiological SaveEcoBot data from their Homepage ([https://www.saveecobot.com/en/radiation-maps](https://www.saveecobot.com/en/radiation-maps))  into QGIS. The Download takes several minutes, because the Plugin loads  the approx. 700 measurement stations and requests the details for each  of these stations resulting in about 700 single requests being sent and  processed. The relevant URLs are already preconfigured, as recently  working, but can be changed in case of any changes in the webpage. 
+
