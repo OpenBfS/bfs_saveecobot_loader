@@ -6,14 +6,14 @@
 name=Saveecobot Loader
 qgisMinimumVersion=3.4
 description=This plugins loads AQI data from Safeecobot
-version=0.7-SNAPSHOT
+version=0.15-SNAPSHOT
 author=Bundesamt für Strahlenschutz
 email=mlechner@bfs.de
 
 about=Saveecobot Loader loads data from https://www.saveecobot.com/en/radiation-maps e.g. https://www.saveecobot.com/storage/maps_data
 
-tracker=https://github.com/mlechner/bfs_saveecobot_loader/issues
-repository=https://github.com/mlechner/bfs_saveecobot_loader
+tracker=https://github.com/OpenBfS/bfs_saveecobot_loader/issues
+repository=https://github.com/OpenBfS/bfs_saveecobot_loader
 # End of mandatory metadata
 
 # Recommended items:
