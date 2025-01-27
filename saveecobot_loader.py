@@ -368,7 +368,6 @@ class SaveecobotLoader:
                     except:
                         feature.setAttribute("history_hours", None)
                     #feature.setAttribute("history_hours", int(markerdata["history_hours"]))
-                    feature.setAttribute("history_hours", int(markerdata["history_hours"]))
                     feature.setAttribute("content", str(markerdata["content"]))
                     vl.updateFeature(feature)
                 percent = current / float(count) * 100
