@@ -362,6 +362,12 @@ class SaveecobotLoader:
                     if (len(markerdata["history"]) > 0):
                         feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
                         feature.setAttribute("history", str(markerdata["history"]))
+                    # history_hours can be an empty list or an integer. Don't know why NULL is coded as an empty list here.
+                    try:
+                        feature.setAttribute("history_hours", int(markerdata["history_hours"]))
+                    except:
+                        feature.setAttribute("history_hours", None)
+                    #feature.setAttribute("history_hours", int(markerdata["history_hours"]))
                     feature.setAttribute("history_hours", int(markerdata["history_hours"]))
                     feature.setAttribute("content", str(markerdata["content"]))
                     vl.updateFeature(feature)
