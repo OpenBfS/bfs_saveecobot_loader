@@ -210,7 +210,7 @@ class SaveecobotLoader:
             sebtimestring = requesttime.toString('yyyy-MM-ddThhmm:ss')
             markertimestring = requesttime.toString('yyyy-MM-ddThh-mm:ss')
             sebkey = 'gamma'
-            
+
             # Set up the first GET Request to SaveEcoBot
             sebquery = QUrlQuery()
             sebquery.addQueryItem('date', sebtimestring)
@@ -231,7 +231,9 @@ class SaveecobotLoader:
                 # Get the content of the response and process it
                 sebdata = json.loads(bytes(response.content()))
             else:
-                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl, level=Qgis.Critical)
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl.toString(), level=Qgis.Critical)
+                self.prog.close()
+                return
 
             # create layer
             vl_name = self.dlg.lineEditLayerName.text() if (self.dlg.lineEditLayerName.text() and len(self.dlg.lineEditLayerName.text()) > 0) else "temporary_saveecobot"
@@ -256,9 +258,10 @@ class SaveecobotLoader:
                             except ValueError:
                                 pr.addAttributes([QgsField(key, QVariant.String)])
             else:
-                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl, level=Qgis.Critical)
-                exit
-                    
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl.toString(), level=Qgis.Critical)
+                self.prog.close()
+                return
+
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             # add detailfields
 
