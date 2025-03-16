@@ -245,6 +245,7 @@ class SaveecobotLoader:
                     QgsField("lat", QVariant.Double)])
             # add all other fields i a generic way
             keylist = []
+            # first loop to create the correct attribute columns
             if 'devices' in sebdata.keys() and isinstance(sebdata['devices'], list):
                 for sebdatarow in sebdata['devices']:
                     for key in sebdatarow.keys():
@@ -262,6 +263,7 @@ class SaveecobotLoader:
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             # add detailfields
 
+            # second loop to fill attribute table with data from first request
             if 'devices' in sebdata.keys() and isinstance(sebdata['devices'], list):
                 for sebdatarow in sebdata['devices']:
                     if sebkey in sebdatarow:
@@ -340,6 +342,8 @@ class SaveecobotLoader:
             count = vl.featureCount()
             self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
 
+            # third loop to fetch details for features
+            # TODO this should be parallelized!!
             for current, feature in enumerate(vl.getFeatures()):
                 markerdata = json.loads('{}')
                 sfid = str(feature.attribute("id"))
@@ -349,13 +353,23 @@ class SaveecobotLoader:
                 markerquery.addQueryItem('marker_id', sfid)
                 markerurl.setQuery(markerquery)
                 markerrequest = QNetworkRequest(markerurl)
-                response: QgsNetworkReplyContent = manager.blockingGet(markerrequest)
-                status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
-                if status_code == 200:
-                    # Get the content of the response and process it
-                    markerdata = json.loads(bytes(response.content()))
-                else:
-                    self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
+                # TODO add a retry when reqest fails (may be hardcoded on three times as a starting point?)
+                retry_loop = 0
+                while retry_loop < 3:
+                    retry_loop += 1
+                    response: QgsNetworkReplyContent = manager.blockingGet(markerrequest)
+                    status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+                    if status_code == 200:
+                        # Get the content of the response and process it
+                        markerdata = json.loads(bytes(response.content()))
+                        # nothing more to do in this retry_loop
+                        break
+                    else:
+                        if retry_loop < 3:
+                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", str(retry_loop) + ". attempt to load details for " + sfid + " failed. Retrying.", level=Qgis.Warning, duration=3)
+                            continue
+                        else:
+                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
                 markerquery.removeQueryItem('marker_id')
                 if markerdata != json.loads('{}'):
                     feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
