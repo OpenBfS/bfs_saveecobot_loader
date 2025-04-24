@@ -203,7 +203,7 @@ class SaveecobotLoader:
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.dlg.exec()
         # See if OK was pressed
         if result:
             requesttime = self.dlg.dateTimeEdit.dateTime()
@@ -218,7 +218,7 @@ class SaveecobotLoader:
             seburl.setQuery(sebquery)
             self.prog = QProgressDialog('Requesting data. This may take a while. Please be patient ...', 'Cancel', 0, 100)
             self.prog.setWindowTitle('SaveEcoBot data loader. Requesting locations.')
-            self.prog.setWindowModality(Qt.WindowModal)
+            self.prog.setWindowModality(Qt.WindowModality.WindowModal)
             self.prog.setMinimumWidth(500)
             self.prog.show()
 
@@ -226,12 +226,12 @@ class SaveecobotLoader:
 
             sebrequest = QNetworkRequest(seburl)
             response: QgsNetworkReplyContent = manager.blockingGet(sebrequest)
-            status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+            status_code = response.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
             if status_code == 200:
                 # Get the content of the response and process it
                 sebdata = json.loads(bytes(response.content()))
             else:
-                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl, level=Qgis.Critical)
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl, level=Qgis.MessageLevel.Critical)
 
             # create layer
             vl_name = self.dlg.lineEditLayerName.text() if (self.dlg.lineEditLayerName.text() and len(self.dlg.lineEditLayerName.text()) > 0) else "temporary_saveecobot"
@@ -257,7 +257,7 @@ class SaveecobotLoader:
                             except ValueError:
                                 pr.addAttributes([QgsField(key, QVariant.String)])
             else:
-                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl, level=Qgis.Critical)
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl, level=Qgis.MessageLevel.Critical)
                 exit
                     
             vl.updateFields() # tell the vector layer to fetch changes from the provider
@@ -287,19 +287,19 @@ class SaveecobotLoader:
                                             featattributes.append(int(sebdatarow[key]))
                                         except:
                                             featattributes.append(None)
-                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.Warning)
+                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.MessageLevel.Warning)
                                     elif vl.fields().field(key).type() == QVariant.Double:
                                         try:
                                             featattributes.append(float(sebdatarow[key]))
                                         except:
                                             featattributes.append(None)
-                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.Warning)
+                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.MessageLevel.Warning)
                                     elif vl.fields().field(key).type() == QVariant.String:
                                         try:
                                             featattributes.append(str(sebdatarow[key]))
                                         except:
                                             featattributes.append(None)
-                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.Warning)
+                                            self.iface.messageBar().pushMessage("Warning", "wrong data type at id " + str(featattributes[0]) + " for attribute " + key + ". value " + str(sebdatarow[key]) + " not imported.", level=Qgis.MessageLevel.Warning)
                                     else:
                                         featattributes.append(None)
                                 else:
@@ -308,7 +308,7 @@ class SaveecobotLoader:
                             feat.setAttributes(featattributes)
                             pr.addFeatures([feat])
                         else:
-                            self.iface.messageBar().pushMessage("Error", "featattributes len for id " + str(featattributes[0]) + " is " + str(len(featattributes)), level=Qgis.Critical)
+                            self.iface.messageBar().pushMessage("Error", "featattributes len for id " + str(featattributes[0]) + " is " + str(len(featattributes)), level=Qgis.MessageLevel.Critical)
 
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
@@ -358,7 +358,7 @@ class SaveecobotLoader:
                 while retry_loop < 3:
                     retry_loop += 1
                     response: QgsNetworkReplyContent = manager.blockingGet(markerrequest)
-                    status_code = response.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+                    status_code = response.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
                     if status_code == 200:
                         # Get the content of the response and process it
                         markerdata = json.loads(bytes(response.content()))
@@ -366,10 +366,10 @@ class SaveecobotLoader:
                         break
                     else:
                         if retry_loop < 3:
-                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", str(retry_loop) + ". attempt to load details for " + sfid + " failed. Retrying.", level=Qgis.Warning, duration=3)
+                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", str(retry_loop) + ". attempt to load details for " + sfid + " failed. Retrying.", level=Qgis.MessageLevel.Warning, duration=3)
                             continue
                         else:
-                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.Critical)
+                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.MessageLevel.Critical)
                 markerquery.removeQueryItem('marker_id')
                 if markerdata != json.loads('{}'):
                     feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
