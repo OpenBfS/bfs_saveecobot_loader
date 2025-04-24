@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime, Qt, QUrlQuery, QUrl
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant, QDateTime, Qt, QUrlQuery, QUrl, QMetaType
 from qgis.PyQt.QtNetwork import QNetworkRequest
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QProgressDialog
@@ -35,7 +35,7 @@ from .resources import *
 from .saveecobot_loader_dialog import SaveecobotLoaderDialog
 import os.path
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class SaveecobotLoader:
@@ -198,8 +198,8 @@ class SaveecobotLoader:
             self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/en/maps/marker.json")
 
         # set default values for dlg
-        self.dlg.dateTimeEdit.setDateTime(datetime.utcnow())
-        self.dlg.lineEditLayerName.setText(datetime.strftime(datetime.utcnow(), '%Y%m%d-%H%M_saveecobot'))
+        self.dlg.dateTimeEdit.setDateTime(datetime.now(UTC))
+        self.dlg.lineEditLayerName.setText(datetime.strftime(datetime.now(UTC), '%Y%m%d-%H%M_saveecobot'))
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
@@ -240,9 +240,9 @@ class SaveecobotLoader:
 
             pr = vl.dataProvider()
             # add fields default fields
-            pr.addAttributes([QgsField("id", QVariant.Int),
-                    QgsField("lon",  QVariant.Double),
-                    QgsField("lat", QVariant.Double)])
+            pr.addAttributes([QgsField("id", QMetaType.Type.Int),
+                    QgsField("lon",  QMetaType.Type.Double),
+                    QgsField("lat", QMetaType.Type.Double)])
             # add all other fields i a generic way
             keylist = []
             # first loop to create the correct attribute columns
@@ -253,9 +253,9 @@ class SaveecobotLoader:
                             keylist.append(key)
                             try:
                                 float(sebdatarow[key])
-                                pr.addAttributes([QgsField(key, QVariant.Double)])
+                                pr.addAttributes([QgsField(key, QMetaType.Type.Double)])
                             except ValueError:
-                                pr.addAttributes([QgsField(key, QVariant.String)])
+                                pr.addAttributes([QgsField(key, QMetaType.Type.QString)])
             else:
                 self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl, level=Qgis.MessageLevel.Critical)
                 exit
@@ -322,11 +322,11 @@ class SaveecobotLoader:
             # refresh
             self.iface.mapCanvas().refresh()
 
-            pr.addAttributes([QgsField("device_id", QVariant.String),
-                    QgsField("latest", QVariant.DateTime),
-                    QgsField("history", QVariant.String),
-                    QgsField("history_hours", QVariant.Int),
-                    QgsField("content", QVariant.String)])
+            pr.addAttributes([QgsField("device_id", QMetaType.Type.QString),
+                    QgsField("latest", QMetaType.Type.QDateTime),
+                    QgsField("history", QMetaType.Type.QString),
+                    QgsField("history_hours", QMetaType.Type.Int),
+                    QgsField("content", QMetaType.Type.QString)])
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             vl.startEditing()
             markerquery = QUrlQuery()
