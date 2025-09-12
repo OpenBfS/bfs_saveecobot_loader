@@ -374,7 +374,9 @@ class SaveecobotLoader:
                 if markerdata != json.loads('{}'):
                     feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
                     if (len(markerdata["history"]) > 0):
-                        feature.setAttribute("latest", QDateTime.fromString(sorted(markerdata["history"].keys()).pop(), "yyyy-MM-dd hh:mm:ss"))
+                        sorted_history = sorted(markerdata["history"], key=lambda x: x[0])
+                        # Note: open issue in QGIS - UTC time is reported as local time -> https://github.com/qgis/QGIS/issues/56695
+                        feature.setAttribute("latest", QDateTime.fromString(sorted_history.pop()[0], "yyyy-MM-ddThh:mm:ssZ"))
                         feature.setAttribute("history", str(markerdata["history"]))
                     # history_hours can be an empty list or an integer. Don't know why NULL is coded as an empty list here.
                     try:
