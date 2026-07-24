@@ -195,7 +195,7 @@ class SaveecobotLoader:
             self.first_start = False
             self.dlg = SaveecobotLoaderDialog()
             self.dlg.sebDataUrlLineEdit.setText("https://www.saveecobot.com/storage/maps_data.js")
-            self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/maps/marker-popup-v2/en/device")
+            self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/maps/marker-popup-v2/en/device/{sfid}/gamma.json")
 
         # set default values for dlg
         self.dlg.dateTimeEdit.setDateTime(datetime.now(UTC))
@@ -327,7 +327,12 @@ class SaveecobotLoader:
                     QgsField("latest", QMetaType.Type.QDateTime),
                     QgsField("history", QMetaType.Type.QString),
                     QgsField("history_hours", QMetaType.Type.Int),
-                    QgsField("content", QMetaType.Type.QString)])
+                    QgsField("content", QMetaType.Type.QString),
+                    QgsField("payload_device", QMetaType.Type.QString),
+                    QgsField("payload_location", QMetaType.Type.QString),
+                    QgsField("payload_platform", QMetaType.Type.QString),
+                    QgsField("payload_value", QMetaType.Type.QString),
+                    QgsField("payload", QMetaType.Type.QString)])
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             vl.startEditing()
 
@@ -367,11 +372,17 @@ class SaveecobotLoader:
                         continue
                 feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
                 if len(markerdata['history']) > 0:
-                    for i in markerdata["history"]:
-                        feature.setAttribute("latest", QDateTime.fromString(markerdata["history"][0][0], "yyyy-MM-dd hh:mm:ss"))
-                        feature.setAttribute("history", str(markerdata["history"]))
+                    sorted_history = sorted(markerdata["history"], key=lambda x: x[0])
+                    # Note: open issue in QGIS - UTC time is reported as local time -> https://github.com/qgis/QGIS/issues/56695
+                    feature.setAttribute("latest", QDateTime.fromString(sorted_history[-1][0], "yyyy-MM-ddThh:mm:ssZ"))
+                    feature.setAttribute("history", str(markerdata["history"]))
                 feature.setAttribute("history_hours", int(markerdata["history_hours"]))
-                #feature.setAttribute("content", str(markerdata["content"]))
+                feature.setAttribute("content", str(markerdata["payload"]))
+                feature.setAttribute("payload_device", str(markerdata["payload"]["device"]))
+                feature.setAttribute("payload_location", str(markerdata["payload"]["location"]))
+                feature.setAttribute("payload_platform", str(markerdata["payload"]["platform"]))
+                feature.setAttribute("payload_value", str(markerdata["payload"]["value"]))
+                feature.setAttribute("payload", str(markerdata["payload"]))
                 vl.updateFeature(feature)
                 percent = current / float(count) * 100
                 self.prog.setValue(int(percent))
