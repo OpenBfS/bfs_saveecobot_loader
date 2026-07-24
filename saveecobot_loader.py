@@ -195,7 +195,7 @@ class SaveecobotLoader:
             self.first_start = False
             self.dlg = SaveecobotLoaderDialog()
             self.dlg.sebDataUrlLineEdit.setText("https://www.saveecobot.com/storage/maps_data.js")
-            self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/en/maps/marker.json")
+            self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/maps/marker-popup-v2/en/device")
 
         # set default values for dlg
         self.dlg.dateTimeEdit.setDateTime(datetime.now(UTC))
@@ -210,7 +210,7 @@ class SaveecobotLoader:
             sebtimestring = requesttime.toString('yyyy-MM-ddThhmm:ss')
             markertimestring = requesttime.toString('yyyy-MM-ddThh-mm:ss')
             sebkey = 'gamma'
- 
+            
             # Set up the first GET Request to SaveEcoBot
             sebquery = QUrlQuery()
             sebquery.addQueryItem('date', sebtimestring)
@@ -231,9 +231,7 @@ class SaveecobotLoader:
                 # Get the content of the response and process it
                 sebdata = json.loads(bytes(response.content()))
             else:
-                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl.toString(), level=Qgis.MessageLevel.Critical)
-                self.prog.close()
-                return
+                self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Couldn't load data from " + seburl, level=Qgis.Critical)
 
             # create layer
             vl_name = self.dlg.lineEditLayerName.text() if (self.dlg.lineEditLayerName.text() and len(self.dlg.lineEditLayerName.text()) > 0) else "temporary_saveecobot"
@@ -262,11 +260,11 @@ class SaveecobotLoader:
                 self.iface.messageBar().pushMessage("SaveEcoBot loader error", "No devices list found in data from " + seburl.toString(), level=Qgis.MessageLevel.Critical)
                 self.prog.close()
                 return
-
+                    
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             # add detailfields
 
-            # second loop to fill attribute table with data from first request
+            # second loop to create the features
             if 'devices' in sebdata.keys() and isinstance(sebdata['devices'], list):
                 for sebdatarow in sebdata['devices']:
                     if sebkey in sebdatarow:
@@ -332,62 +330,49 @@ class SaveecobotLoader:
                     QgsField("content", QMetaType.Type.QString)])
             vl.updateFields() # tell the vector layer to fetch changes from the provider
             vl.startEditing()
-            markerquery = QUrlQuery()
-            markerquery.addQueryItem('marker_type', 'device')
-            markerquery.addQueryItem('pollutant', str(sebkey))
-            markerquery.addQueryItem('is_wide', str(1))
-            markerquery.addQueryItem('is_iframe', str(0))
-            markerquery.addQueryItem('is_widget', str(0))
-            markerquery.addQueryItem('rand', markertimestring)
-            markerurl = QUrl(self.dlg.sebMarkerDataUrlLineEdit.text())
+
+            marker_url_template = self.dlg.sebMarkerDataUrlLineEdit.text().strip()
+            if '{sfid}' not in marker_url_template:
+                marker_url_template = marker_url_template.rstrip('/') + '/{sfid}/gamma.json'
 
             # load detail data for features
             count = vl.featureCount()
             self.prog.setWindowTitle('SaveEcoBot details loader. Requesting ' + str(count) + ' details.')
 
-            # third loop to fetch details for features
-            # TODO this should be parallelized!!
+            # loop through features and request details
+            # TODO: this should be parallelized to speed up the process, but we need to be careful with rate limits and error handling
             for current, feature in enumerate(vl.getFeatures()):
-                markerdata = json.loads('{}')
+                markerdata = json.loads('{}')  # initialize markerdata as an empty dict
+                tried = 0
+                maxtry = 3
                 sfid = str(feature.attribute("id"))
                 percent = current / float(count) * 100
                 self.prog.setValue(int(percent))
                 self.prog.setLabelText('Requesting details for device ID ' + sfid + '. Please be patient.')
-                markerquery.addQueryItem('marker_id', sfid)
-                markerurl.setQuery(markerquery)
+                markerurl = QUrl(marker_url_template.replace('{sfid}', sfid))
                 markerrequest = QNetworkRequest(markerurl)
-                # TODO add a retry when reqest fails (may be hardcoded on three times as a starting point?)
-                retry_loop = 0
-                while retry_loop < 3:
-                    retry_loop += 1
+                while tried <= maxtry:
                     response: QgsNetworkReplyContent = manager.blockingGet(markerrequest)
                     status_code = response.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
                     if status_code == 200:
                         # Get the content of the response and process it
                         markerdata = json.loads(bytes(response.content()))
-                        # nothing more to do in this retry_loop
                         break
+                    elif status_code != 200 and (tried < maxtry):
+                        tried += 1
+                        self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Retrying to load details for " + sfid + ". Tried " + str(tried) + "/" + str(maxtry), level=Qgis.MessageLevel.Info)
+                        continue
                     else:
-                        if retry_loop < 3:
-                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", str(retry_loop) + ". attempt to load details for " + sfid + " failed. Retrying.", level=Qgis.MessageLevel.Warning, duration=3)
-                            continue
-                        else:
-                            self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid, level=Qgis.MessageLevel.Critical)
-                markerquery.removeQueryItem('marker_id')
-                if markerdata != json.loads('{}'):
-                    feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
-                    if (len(markerdata["history"]) > 0):
-                        sorted_history = sorted(markerdata["history"], key=lambda x: x[0])
-                        # Note: open issue in QGIS - UTC time is reported as local time -> https://github.com/qgis/QGIS/issues/56695
-                        feature.setAttribute("latest", QDateTime.fromString(sorted_history.pop()[0], "yyyy-MM-ddThh:mm:ssZ"))
+                        self.iface.messageBar().pushMessage("SaveEcoBot loader error", "Could not load details for " + sfid + ". Giving up after " + str(tried) + " tries.", level=Qgis.MessageLevel.Warning, duration=3)
+                        continue
+                feature.setAttribute("device_id", str(markerdata["marker_data"]["id"]))
+                if len(markerdata['history']) > 0:
+                    for i in markerdata["history"]:
+                        feature.setAttribute("latest", QDateTime.fromString(markerdata["history"][0][0], "yyyy-MM-dd hh:mm:ss"))
                         feature.setAttribute("history", str(markerdata["history"]))
-                    # history_hours can be an empty list or an integer. Don't know why NULL is coded as an empty list here.
-                    try:
-                        feature.setAttribute("history_hours", int(markerdata["history_hours"]))
-                    except:
-                        feature.setAttribute("history_hours", None)
-                    feature.setAttribute("content", str(markerdata["content"]))
-                    vl.updateFeature(feature)
+                feature.setAttribute("history_hours", int(markerdata["history_hours"]))
+                #feature.setAttribute("content", str(markerdata["content"]))
+                vl.updateFeature(feature)
                 percent = current / float(count) * 100
                 self.prog.setValue(int(percent))
                 self.prog.setLabelText('Requesting details for device ID ' + sfid + '. Please be patient.')
