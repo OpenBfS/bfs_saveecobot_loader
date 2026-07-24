@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>745</width>
-    <height>529</height>
+    <width>739</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>470</y>
+     <y>549</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -53,84 +53,26 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>20</x>
      <y>100</y>
-     <width>371</width>
-     <height>191</height>
+     <width>691</width>
+     <height>131</height>
     </rect>
    </property>
    <property name="html">
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;MIt diesem Plugin werden die Radioaktivitätsdaten von Saveecobot (&lt;a href=&quot;https://www.saveecobot.com/en/radiation-maps&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://www.saveecobot.com/en/radiation-maps&lt;/span&gt;&lt;/a&gt;) heruntergeladen. Der Download benötigt mehrere MInuten, da die Detaildaten, die auch die Stationsinformationen enthalten, einzeln heruntergeladen werden müssen. Dazu sind etwa 700 (!) Anfragen erforderlich.&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Die verwendeten URLs sind bereits passend voreingestellt, können im Falle einer Änderung der Webseite aber angepasst werden.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:11pt;&quot;&gt;Mit diesem Plugin werden die Radioaktivitätsdaten von Saveecobot (&lt;/span&gt;&lt;a href=&quot;https://www.saveecobot.com/en/radiation-maps&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:11pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://www.saveecobot.com/en/radiation-maps&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:11pt;&quot;&gt;) heruntergeladen. Der Download benötigt mehrere Minuten, da die Detaildaten, die auch die Stationsinformationen enthalten, einzeln heruntergeladen werden müssen. Dazu sind etwa 1000 (!) Anfragen erforderlich.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:11pt;&quot;&gt;Die verwendeten URLs sind bereits passend voreingestellt, können im Falle einer Änderung der Webseite aber angepasst werden.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
-  </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>310</y>
-     <width>661</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Saveecobot data URL</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="sebDataUrlLineEdit">
-      <property name="text">
-       <string>saveecobot data url</string>
-      </property>
-      <property name="clearButtonEnabled">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>31</x>
-     <y>350</y>
-     <width>681</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
-    <item>
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Saveecobot marker URL</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="sebMarkerDataUrlLineEdit">
-      <property name="text">
-       <string>save eco bot marker data url</string>
-      </property>
-      <property name="clearButtonEnabled">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
   </widget>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>430</y>
+     <y>509</y>
      <width>671</width>
      <height>28</height>
     </rect>
@@ -159,7 +101,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>390</y>
+     <y>469</y>
      <width>201</width>
      <height>26</height>
     </rect>
@@ -172,7 +114,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>460</x>
-     <y>391</y>
+     <y>470</y>
      <width>251</width>
      <height>25</height>
     </rect>
@@ -181,11 +123,155 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>260</y>
+     <width>711</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="scrapingtab">
+    <attribute name="title">
+     <string>Scraping</string>
+    </attribute>
+    <widget class="QWidget" name="layoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>80</y>
+       <width>681</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Saveecobot marker URL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="sebMarkerDataUrlLineEdit">
+        <property name="text">
+         <string>save eco bot marker data url</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>40</y>
+       <width>661</width>
+       <height>45</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Saveecobot data URL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="sebDataUrlLineEdit">
+        <property name="text">
+         <string>saveecobot data url</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="apikeytab">
+    <attribute name="title">
+     <string>API</string>
+    </attribute>
+    <widget class="QLineEdit" name="sebMarkerAPIUrlLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>131</x>
+       <y>42</y>
+       <width>558</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>save eco bot api url</string>
+     </property>
+     <property name="clearButtonEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="sebAPIkeyLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>81</y>
+       <width>549</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>saveecobot apikey</string>
+     </property>
+     <property name="clearButtonEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>115</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Saveecobot API URL</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>70</y>
+       <width>104</width>
+       <height>43</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Saveecobot APIkey</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <zorder>tabWidget</zorder>
+  <zorder>button_box</zorder>
+  <zorder>label</zorder>
+  <zorder>textBrowser</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>label_5</zorder>
+  <zorder>lineEditLayerName</zorder>
  </widget>
  <tabstops>
   <tabstop>textBrowser</tabstop>
-  <tabstop>sebDataUrlLineEdit</tabstop>
-  <tabstop>sebMarkerDataUrlLineEdit</tabstop>
   <tabstop>dateTimeEdit</tabstop>
  </tabstops>
  <resources/>

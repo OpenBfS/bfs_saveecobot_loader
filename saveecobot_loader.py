@@ -197,6 +197,8 @@ class SaveecobotLoader:
             self.dlg = SaveecobotLoaderDialog()
             self.dlg.sebDataUrlLineEdit.setText("https://www.saveecobot.com/storage/maps_data.js")
             self.dlg.sebMarkerDataUrlLineEdit.setText("https://www.saveecobot.com/maps/marker-popup-v2/en/device/{sfid}/gamma.json")
+            self.dlg.sebMarkerAPIUrlLineEdit.setText("https://www.saveecobot.com/api/v1/radiation-ukraine/")
+            self.dlg.sebAPIkeyLineEdit.setText("YOUR_API_KEY_HERE")
 
         # set default values for dlg
         self.dlg.dateTimeEdit.setDateTime(datetime.now(UTC))
@@ -207,4 +209,5 @@ class SaveecobotLoader:
         result = self.dlg.exec()
         # See if OK was pressed
         if result:
-            execute_loader_action(result, self)
+            loader_switch = self.dlg.tabWidget.currentIndex()
+            execute_loader_action(result, loader_switch, self)
