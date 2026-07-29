@@ -4,7 +4,7 @@
 import json
 
 
-def run_saveecobot_loader(plugin):
+def run_scraper_loader(plugin):
     """Execute the existing SaveEcoBot loading workflow."""
     from qgis.PyQt.QtCore import (
         QDateTime,

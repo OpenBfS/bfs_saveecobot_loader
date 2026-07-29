@@ -2,7 +2,7 @@
 """Dispatches dialog results to the appropriate loader implementation."""
 
 from .apikey_loader_impl import run_apikey_loader
-from .saveecobot_loader_impl import run_saveecobot_loader
+from .scraper_loader_impl import run_saveecobot_loader
 
 
 def resolve_loader_handler(result, loader_switch):
