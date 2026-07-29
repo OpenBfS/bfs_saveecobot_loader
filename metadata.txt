@@ -26,7 +26,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=python
 
-homepage=http://www.bfs.de
+homepage=https://www.bfs.de
 category=Vector
 icon=icon.png
 # experimental flag
