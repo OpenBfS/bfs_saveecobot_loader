@@ -13,6 +13,7 @@ email=mlechner@bfs.de
 
 about=Saveecobot Loader loads data from https://www.saveecobot.com/en/radiation-maps e.g. https://www.saveecobot.com/storage/maps_data
 
+homepage=https://www.bfs.de
 tracker=https://github.com/OpenBfS/bfs_saveecobot_loader/issues
 repository=https://github.com/OpenBfS/bfs_saveecobot_loader
 # End of mandatory metadata
@@ -26,7 +27,6 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=python
 
-homepage=https://www.bfs.de
 category=Vector
 icon=icon.png
 # experimental flag
