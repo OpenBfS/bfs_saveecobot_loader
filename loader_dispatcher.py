@@ -2,13 +2,13 @@
 """Dispatches dialog results to the appropriate loader implementation."""
 
 from .apikey_loader_impl import run_apikey_loader
-from .saveecobot_loader_impl import run_saveecobot_loader
+from .scraper_loader_impl import run_scraper_loader
 
 
 def resolve_loader_handler(result, loader_switch):
     """Return the loader handler for a dialog result value."""
     if result in (True, 1) and loader_switch == 0:
-        return run_saveecobot_loader
+        return run_scraper_loader
     if result in (True, 1) and loader_switch == 1:
         return run_apikey_loader
     return None

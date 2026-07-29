@@ -203,6 +203,9 @@ p, li { white-space: pre-wrap; }
      <string>API</string>
     </attribute>
     <widget class="QLineEdit" name="sebMarkerAPIUrlLineEdit">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>131</x>
@@ -219,6 +222,9 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
     <widget class="QLineEdit" name="sebAPIkeyLineEdit">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -258,6 +264,29 @@ p, li { white-space: pre-wrap; }
      </property>
      <property name="text">
       <string>Saveecobot APIkey</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>10</y>
+       <width>301</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>&lt;font color='red'&gt;This is not imlemented yet!&lt;/font&gt;</string>
      </property>
     </widget>
    </widget>
