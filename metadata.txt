@@ -5,9 +5,9 @@
 [general]
 name=Saveecobot Loader
 qgisMinimumVersion=3.40
-supportsQt6=True
+qgisMaximumVersion=4.99
 description=This plugins loads AQI data from Safeecobot
-version=1.6
+version=1.7-SNAPSHOT
 author=Bundesamt für Strahlenschutz
 email=mlechner@bfs.de
 
